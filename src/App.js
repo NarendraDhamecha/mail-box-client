@@ -1,15 +1,19 @@
-import './App.css';
+// import './App.css';
 import UserAuthentication from './components/Auth/UserAuthentication';
+import { Route, Switch } from 'react-router-dom';
+import MailBox from './components/MailBox/MailBox';
+import { useSelector } from 'react-redux';
 
 function App() {
-  return (
-    // <div className="App">
-    //   <header className="App-header">
-    //     <button className='btn btn-danger'></button>
-    //   </header>
-    // </div>
+  const isLoggedIn = useSelector(state => state.Auth.isLoggedIn);
 
-    <UserAuthentication/>
+  return (
+    <>
+    <Switch>
+      {isLoggedIn && <Route exact path='/mailbox' component={MailBox}/>}
+      <Route exact path='/' component={UserAuthentication}/>
+    </Switch>
+    </>
   );
 }
 
