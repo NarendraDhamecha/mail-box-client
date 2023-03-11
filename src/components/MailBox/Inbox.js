@@ -24,7 +24,8 @@ const Inbox = () => {
           to: data[i].to,
           from: data[i].from,
           subject: data[i].subject,
-          message: data[i].message
+          message: data[i].message,
+          read: data[i].read
         });
       }
       dispatch(EmailActions.setEmail(emails));
@@ -41,14 +42,16 @@ const Inbox = () => {
       <div className="row">
         <SideBar />
         <div className="col-md-10 col-10">
-        {console.log(filteredList)}
           {filteredList.map((email) => {
             return (
               <EmailList
+                id={email.id}
+                to={email.to}
                 key={email.id}
                 email={email.from}
                 subject={email.subject}
                 message={email.message}
+                read={email.read}
               />
             );
           })}

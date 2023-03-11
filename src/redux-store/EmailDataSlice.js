@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     emails: [],
+    emailMsg: null,
 }
 
 const EmailDataSlice = createSlice({
@@ -10,6 +11,10 @@ const EmailDataSlice = createSlice({
     reducers: {
         setEmail(state, action){
             state.emails = [...action.payload];
+        },
+
+        setEmailMsg(state, action){
+            state.emailMsg = action.payload;
         }
     }
 })
