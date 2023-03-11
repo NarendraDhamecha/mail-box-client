@@ -1,9 +1,10 @@
 import "./EmailList.css";
 import { EmailActions } from "../../redux-store/EmailDataSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 const EmailList = (props) => {
+  const emails = useSelector(state => state.Email.emails)
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -35,10 +36,28 @@ const EmailList = (props) => {
     }
   }
 
+  const deleteEmailHandler = async () => {
+     try{
+      const res = await fetch(`https://mail-box-client-bcd20-default-rtdb.firebaseio.com/email/${props.id}.json`,{
+        method : "DELETE",
+      })
+
+      if(res.ok){
+        const updatedList = emails.filter((email) => {
+          return email.id !== props.id;
+        })
+         
+        dispatch(EmailActions.setEmail(updatedList))
+      }
+     }catch(e){
+
+     }
+  }
+
     return (
-        <div className="emailbody" onClick={setEmailDetailMsg}>
+        <div className="emailbody">
             {!props.read && <span className="me-2 mb-2">•</span>}
-            <div className="emailbody_left">
+            <div className="emailbody_left" onClick={setEmailDetailMsg}>
               <h5>{props.email}</h5>
             </div>
             <div className="emailbody_middle">
@@ -48,6 +67,9 @@ const EmailList = (props) => {
             </div>
             <div className="emailbody_right">
               <p>02:30 PM</p>
+            </div>
+            <div>
+              <button onClick={deleteEmailHandler} className="btn btn-danger btn-sm">Delete</button>
             </div>
           </div>
     )
