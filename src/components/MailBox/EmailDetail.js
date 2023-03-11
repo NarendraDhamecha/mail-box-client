@@ -16,7 +16,7 @@ const EmailDetail = () => {
       const emailMsg = localStorage.getItem("emaildetail");
       dispatch(EmailActions.setEmailMsg(JSON.parse(emailMsg)));
     }
-  }, [fullMsg]);
+  }, [fullMsg, dispatch]);
 
   return (
     <div className="container-fluid">
@@ -28,7 +28,7 @@ const EmailDetail = () => {
               {fullMsg && <h4>Subject : {fullMsg.subject}</h4>}
             </div>
             <div className="text-start">
-              {fullMsg && <p>From : {fullMsg.email}</p>}
+              {fullMsg && <p>{fullMsg.to_from} : {fullMsg.email}</p>}
             </div>
             <div className="card mt-2 ms-5">
               <div className="card-body">
