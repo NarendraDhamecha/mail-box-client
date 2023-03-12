@@ -30,8 +30,17 @@ const Inbox = () => {
       }
       dispatch(EmailActions.setEmail(emails));
     };
-    getEmailData();
-  }, []);
+    console.log('useEffect')
+    const id = setInterval(() => {
+      console.log('interval')
+      getEmailData();
+    },5000);
+
+    return () => {
+      console.log('cleanup')
+      clearInterval(id);
+    }
+  }, [dispatch]);
 
   const filteredList = emailData.filter((email) => {
     return email.to === LoggedInemail;
@@ -47,11 +56,13 @@ const Inbox = () => {
               <EmailList
                 id={email.id}
                 to={email.to}
+                from={email.from}
                 key={email.id}
                 email={email.from}
                 subject={email.subject}
                 message={email.message}
                 read={email.read}
+                to_from={'from'}
               />
             );
           })}
