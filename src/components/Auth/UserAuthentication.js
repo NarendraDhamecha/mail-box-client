@@ -55,7 +55,7 @@ const UserAuthentication = () => {
 
       if (response.ok) {
         if(isLogIn){
-            dispatch(AuthActions.setToken(data.idToken))
+            dispatch(AuthActions.setToken({token: data.idToken, email: data.email}))
             history.push('/mailbox')
         }else{
             console.log("User has successfully signed up.");

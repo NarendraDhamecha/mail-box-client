@@ -38,6 +38,7 @@ const MailBox = () => {
             to,
             subject,
             message,
+            read: false
           }),
         }
       );
