@@ -28,11 +28,11 @@ const EmailDetail = () => {
               {fullMsg && <h4>Subject : {fullMsg.subject}</h4>}
             </div>
             <div className="text-start">
-              {fullMsg && <p>{fullMsg.to_from} : {fullMsg.email}</p>}
+              {fullMsg && <p>{fullMsg.from_to} : {fullMsg.email}</p>}
             </div>
             <div className="card mt-2 ms-5">
               <div className="card-body">
-                <p>Message : {fullMsg.message}</p>
+                {fullMsg && <p>Message : {fullMsg.message}</p>}
               </div>
             </div>
           </div>

@@ -2,23 +2,36 @@ import { useRef, useState } from "react";
 import { AuthActions } from "../../redux-store/AuthSlice";
 import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import useFetch from "../../hooks/use-fetch";
 
 const UserAuthentication = () => {
   const [isLogIn, setIsLogIn] = useState(true);
   const emailRef = useRef("");
   const passwordRef = useRef("");
   const confirmPasswordRef = useRef("");
-  const history = useHistory()
+  const history = useHistory();
   const dispatch = useDispatch();
+  const sendReq = useFetch();
+
+  const afterSuccessReq = (data) => {
+    if (isLogIn) {
+      dispatch(
+        AuthActions.setToken({ token: data.idToken, email: data.email })
+      );
+      history.push("/mailbox");
+    } else {
+      setIsLogIn(true);
+    }
+  };
 
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    let url =
+    let URL =
       "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAsZM900THTyef0IEB6khvCxK-DIEISlfw";
 
     if (isLogIn) {
-      url =
+      URL =
         "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAsZM900THTyef0IEB6khvCxK-DIEISlfw";
     }
 
@@ -30,42 +43,31 @@ const UserAuthentication = () => {
         alert("Please fill all field");
         return;
       }
-    }else{
-        if (
-            emailRef.current.value.length === 0 ||
-            passwordRef.current.value.length === 0 ||
-            confirmPasswordRef.current.value.length === 0
-            ) {
-              alert("Please fill all field");
-              return;
-            }
-    }
+    } 
 
-    try {
-      const response = await fetch(url, {
+    if (!isLogIn) {
+      if (
+        emailRef.current.value.length === 0 ||
+        passwordRef.current.value.length === 0 ||
+        confirmPasswordRef.current.value.length === 0
+      ) {
+        alert("Please fill all field");
+        return;
+      }
+    } 
+
+    sendReq(
+      {
+        url: URL,
         method: "POST",
-        body: JSON.stringify({
+        body: {
           email: emailRef.current.value,
           password: passwordRef.current.value,
           returnSecureToken: true,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        if(isLogIn){
-            dispatch(AuthActions.setToken({token: data.idToken, email: data.email}))
-            history.push('/mailbox')
-        }else{
-            console.log("User has successfully signed up.");
-        }
-      } else {
-        throw new Error(data.error.message);
-      }
-    } catch (e) {
-      alert(e);
-    }
+        },
+      },
+      afterSuccessReq
+    );
   };
 
   const isLogInHandler = () => {

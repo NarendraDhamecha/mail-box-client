@@ -2,12 +2,20 @@ import { useRef } from "react";
 import JoditEditor from "jodit-react";
 import { useSelector } from "react-redux";
 import SideBar from "../Layout/SideBar";
+import useFetch from "../../hooks/use-fetch";
 
 const MailBox = () => {
   const editorRef = useRef("");
   const toRef = useRef("");
   const subjectRef = useRef("");
-  const from = useSelector(state => state.Auth.email);
+  const from = useSelector((state) => state.Auth.email);
+  const authReq = useFetch();
+
+  const afterReq = () => {
+    toRef.current.value = "";
+    subjectRef.current.value = "";
+    alert("email sent successfully");
+  };
 
   const config = {
     placeholder: "Start typing your email...",
@@ -24,44 +32,26 @@ const MailBox = () => {
       return;
     }
 
-
-    try {
-      const response = await fetch(
-        "https://mail-box-client-bcd20-default-rtdb.firebaseio.com/email.json",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify({
-            from,
-            to,
-            subject,
-            message,
-            read: false
-          }),
-        }
-      );
-
-      const data = await response.json();
-      
-
-      if (response.ok) {
-        toRef.current.value = '';
-        subjectRef.current.value = '';
-        alert('email sent successfully');
-      } else {
-        throw new Error(data.error.message);
-      }
-    } catch (e) {
-       alert(e);
-    }
+    authReq(
+      {
+        url: "https://mail-box-client-bcd20-default-rtdb.firebaseio.com/email.json",
+        method: "POST",
+        body: {
+          from,
+          to,
+          subject,
+          message,
+          read: false,
+        },
+      },
+      afterReq
+    );
   };
 
   return (
     <div className="container-fluid">
       <div className="row">
-        <SideBar/>
+        <SideBar />
         <div className="col-md-5 col-10 mx-auto">
           <form className="mt-5" onSubmit={submitHandler}>
             <div className="mb-2">
