@@ -1,24 +1,30 @@
 import { useRef } from "react";
-import JoditEditor from "jodit-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import SideBar from "../Layout/SideBar";
 import useFetch from "../../hooks/use-fetch";
+import { EmailActions } from "../../redux-store/EmailDataSlice";
 
 const MailBox = () => {
   const editorRef = useRef("");
   const toRef = useRef("");
   const subjectRef = useRef("");
   const from = useSelector((state) => state.Auth.email);
-  const authReq = useFetch();
+  const dispatch = useDispatch();
+  const {sendHttpReq: authReq, isLoading} = useFetch();
 
-  const afterReq = () => {
+  const afterReq = (data) => {
+    dispatch(EmailActions.setSingleEmail({
+      id: data.name,
+      from,
+      to: toRef.current.value,
+      subject: subjectRef.current.value,
+      message: editorRef.current.value,
+      read: false  
+    }))
     toRef.current.value = "";
     subjectRef.current.value = "";
+    editorRef.current.value = "";
     alert("email sent successfully");
-  };
-
-  const config = {
-    placeholder: "Start typing your email...",
   };
 
   const submitHandler = async (e) => {
@@ -46,6 +52,20 @@ const MailBox = () => {
       },
       afterReq
     );
+
+    authReq(
+      {
+        url: "https://mail-box-client-bcd20-default-rtdb.firebaseio.com/sent.json",
+        method: "POST",
+        body: {
+          from,
+          to,
+          subject,
+          message,
+          read: false,
+        },
+      }
+    );
   };
 
   return (
@@ -55,21 +75,35 @@ const MailBox = () => {
         <div className="col-md-5 col-10 mx-auto">
           <form className="mt-5" onSubmit={submitHandler}>
             <div className="mb-2">
-              <input className="form-control" placeholder="To" ref={toRef} />
+              <input
+                type="email"
+                className="form-control"
+                placeholder="To"
+                ref={toRef}
+              />
             </div>
             <div className="mb-2">
               <input
+                type="text"
                 className="form-control"
                 placeholder="Subject"
                 ref={subjectRef}
               />
             </div>
             <div className="mb-2">
-              <JoditEditor ref={editorRef} config={config} />
+              <textarea
+                className="form-control"
+                ref={editorRef}
+                placeholder="Message"
+                rows="10"
+              />
             </div>
-            <button className="btn btn-outline-primary btn-sm" type="submit">
-              Send
-            </button>
+            <div className="text-end">
+              {!isLoading && <button className="btn btn-dark" type="submit">
+                Send
+              </button>}
+              {isLoading && <h5>Sending email...</h5>}
+            </div>
           </form>
         </div>
       </div>

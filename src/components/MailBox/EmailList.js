@@ -1,88 +1,119 @@
 import "./EmailList.css";
 import { EmailActions } from "../../redux-store/EmailDataSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
 import useFetch from "../../hooks/use-fetch";
+import { IconButton } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const EmailList = (props) => {
+  const { id, match, to, from, subject, message, read } = props;
   const emails = useSelector((state) => state.Email.emails);
+  const sentEmails = useSelector((state) => state.Email.sentBox);
   const dispatch = useDispatch();
-  const history = useHistory();
-  const updateReq = useFetch();
+  const { sendHttpReq: updateReq } = useFetch();
 
   let email = null;
   let from_to = null;
 
-  if (props.match === "inbox") {
-    email = props.from;
-    from_to = "from";
+  if (match === "inbox") {
+    email = from;
+    from_to = "From";
   } else {
-    email = props.to;
-    from_to = "to";
+    email = to;
+    from_to = "To";
   }
 
   const updatedList = () => {
-    const updatedList = emails.filter((email) => {
-      return email.id !== props.id;
+    let emailsData = match === 'inbox' ? emails : sentEmails
+    const updatedList = emailsData.filter((email) => {
+      return email.id !== id;
     });
-
+    
+    if(match === 'inbox')
     dispatch(EmailActions.setEmail(updatedList));
+
+    else
+    dispatch(EmailActions.setSentBoxEmails(updatedList))
+  };
+
+  const updateRead = () => {
+    const existingIndex = emails.findIndex((email) => email.id === id);
+    dispatch(EmailActions.setReadMsg(existingIndex));
   };
 
   const setEmailDetailMsg = async () => {
     dispatch(
       EmailActions.setEmailMsg({
-        subject: props.subject,
-        email: email,
-        message: props.message,
+        subject,
+        email,
+        message,
         from_to,
       })
     );
-    history.push("/emaildetail");
 
-    if (props.match === "inbox") {
-      updateReq({
-        url: `https://mail-box-client-bcd20-default-rtdb.firebaseio.com/email/${props.id}.json`,
-        method: "PUT",
-        body: {
-          to: props.to,
-          from: props.from,
-          subject: props.subject,
-          message: props.message,
-          read: true,
+    dispatch(EmailActions.setShowFullEmail());
+
+    if (match === "inbox" && !read) {
+      updateReq(
+        {
+          url: `https://mail-box-client-bcd20-default-rtdb.firebaseio.com/email/${id}.json`,
+          method: "PUT",
+          body: {
+            to,
+            from,
+            subject,
+            message,
+            read: true,
+          },
         },
-      });
+        updateRead
+      );
     }
   };
 
-  const deleteEmailHandler = async () => {
-    updateReq(
-      {
-        url: `https://mail-box-client-bcd20-default-rtdb.firebaseio.com/email/${props.id}.json`,
-        method: "DELETE",
-      },
-      updatedList
-    );
+  const deleteEmailHandler = async (e) => {
+    e.stopPropagation();
+    if(match === 'inbox'){
+      updateReq(
+        {
+          url: `https://mail-box-client-bcd20-default-rtdb.firebaseio.com/email/${id}.json`,
+          method: "DELETE",
+        },
+        updatedList
+      );
+    }
+    else{
+      updateReq(
+        {
+          url: `https://mail-box-client-bcd20-default-rtdb.firebaseio.com/sent/${id}.json`,
+          method: "DELETE",
+        },
+        updatedList
+      );
+    }
+    // updateReq(
+    //   {
+    //     url: `https://mail-box-client-bcd20-default-rtdb.firebaseio.com/email/${id}.json`,
+    //     method: "DELETE",
+    //   },
+    //   updatedList
+    // );
   };
 
   return (
-    <div className="emailbody">
-      {props.match === 'inbox' && !props.read && <span className="me-2 mb-2">•</span>}
-      <div className="emailbody_left" onClick={setEmailDetailMsg}>
+    <div className="emailbody" onClick={setEmailDetailMsg}>
+      {match === 'inbox' && !read && <span className="me-1">»</span>}
+      <div className="emailbody_left">
         <h5>{email}</h5>
       </div>
       <div className="emailbody_middle">
-        <p className="emailbody_middle__msg">
-          <b>{props.subject}</b> {props.message}
-        </p>
+          <b>{subject}</b> {message}
       </div>
-      <div className="emailbody_right">
+      {/* <div className="emailbody_right">
         <p>02:30 PM</p>
-      </div>
+      </div> */}
       <div>
-        <button onClick={deleteEmailHandler} className="btn btn-danger btn-sm">
-          Delete
-        </button>
+      <IconButton onClick={deleteEmailHandler}><DeleteIcon/></IconButton>
       </div>
     </div>
   );

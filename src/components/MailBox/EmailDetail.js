@@ -1,10 +1,14 @@
 import { useDispatch, useSelector } from "react-redux";
-import SideBar from "../Layout/SideBar";
 import { useEffect } from "react";
 import { EmailActions } from "../../redux-store/EmailDataSlice";
+import ModalOverlay from "../UI/ModalOverlays";
 
 const EmailDetail = () => {
   const dispatch = useDispatch();
+
+  const onClose = () => {
+    dispatch(EmailActions.setShowFullEmail());
+  };
 
   const fullMsg = useSelector((state) => state.Email.emailMsg);
 
@@ -19,26 +23,42 @@ const EmailDetail = () => {
   }, [fullMsg, dispatch]);
 
   return (
-    <div className="container-fluid">
+    <ModalOverlay>
       <div className="row">
-        <SideBar />
-        <div className="col-md-5 col-10">
-          <div className="mt-3">
-            <div className="text-start">
-              {fullMsg && <h4>Subject : {fullMsg.subject}</h4>}
-            </div>
-            <div className="text-start">
-              {fullMsg && <p>{fullMsg.from_to} : {fullMsg.email}</p>}
-            </div>
-            <div className="card mt-2 ms-5">
-              <div className="card-body">
-                {fullMsg && <p>Message : {fullMsg.message}</p>}
+        <div className="col-md-8 col-10 mx-auto">
+          <div className="card my-5">
+            {fullMsg && (
+              <p className="card-header d-flex">
+                <b>{fullMsg.from_to}</b> : {fullMsg.email}
+                <button
+                  onClick={onClose}
+                  className="bt btn-close ms-auto"
+                ></button>
+              </p>
+            )}
+            <div className="card-body">
+              {fullMsg && (
+                <p className="card-title">
+                  <b>Subject</b> : {fullMsg.subject}
+                </p>
+              )}
+              <div className="mt-4 ps-2 pt-2 border border-1 rounded">
+                {fullMsg && (
+                  <p>
+                    <b>Message</b> : {fullMsg.message}
+                  </p>
+                )}
+              </div>
+              <div className="text-end mt-3">
+                <button className="btn btn-outline-dark" onClick={onClose}>
+                  Close
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 

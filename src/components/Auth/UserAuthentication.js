@@ -11,7 +11,7 @@ const UserAuthentication = () => {
   const confirmPasswordRef = useRef("");
   const history = useHistory();
   const dispatch = useDispatch();
-  const sendReq = useFetch();
+  const {sendHttpReq: sendReq, isLoading} = useFetch();
 
   const afterSuccessReq = (data) => {
     if (isLogIn) {
@@ -81,10 +81,10 @@ const UserAuthentication = () => {
   }
 
   return (
-    <div className="container-fluid text-center">
+    <div className="container-fluid text-center bg-white">
       <div className="row">
-        <div className="col-md-4 col-10 mx-auto">
-          <div className="card mt-5">
+        <div className="col-md-5 col-10 mx-auto">
+          <div className="card my-5">
             <h3 className="card-header">{header}</h3>
             <div className="card-body">
               <form onSubmit={submitHandler}>
@@ -112,16 +112,20 @@ const UserAuthentication = () => {
                     />
                   </div>
                 )}
-                <button className="btn btn-outline-primary" type="submit">
+                {!isLoading && <button className="btn btn-outline-primary mb-4" type="submit">
                   {header}
-                </button>
+                </button>}
+                {isLoading && <p>⋘ 𝑃𝑙𝑒𝑎𝑠𝑒 𝑤𝑎𝑖𝑡...⋙</p>}
               </form>
+              <div>
+              <p className="">{isLogIn ? "Don't have an account ?": "Already have an account ?"}</p>
               <button
                 onClick={isLogInHandler}
-                className="btn btn-outline-dark mt-3 btn-sm"
+                className="btn btn-outline-dark btn-sm"
               >
                 {isLogIn ? "Sign Up" : "Log In"}
               </button>
+              </div>
             </div>
           </div>
         </div>

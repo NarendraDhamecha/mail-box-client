@@ -7,35 +7,62 @@ import useFetch from "../../hooks/use-fetch";
 
 const Box = (props) => {
   const dispatch = useDispatch();
-  const { filteredList } = props;
-  const {match} = props;
-  const getEmailData = useFetch();
+  const { filteredList, match } = props;
+  const { sendHttpReq: getEmailData } = useFetch();
 
   useEffect(() => {
     const afterGetEmailData = (data) => {
       let emails = [];
 
-        for (let i in data) {
-          emails.push({
-            id: i,
-            to: data[i].to,
-            from: data[i].from,
-            subject: data[i].subject,
-            message: data[i].message,
-            read: data[i].read,
-          });
-        }
-        dispatch(EmailActions.setEmail(emails));
-    }
-    
-    getEmailData({url: "https://mail-box-client-bcd20-default-rtdb.firebaseio.com/email.json"},afterGetEmailData)
+      for (let i in data) {
+        emails.push({
+          id: i,
+          to: data[i].to,
+          from: data[i].from,
+          subject: data[i].subject,
+          message: data[i].message,
+          read: data[i].read,
+        });
+      }
+      if (match === "inbox") dispatch(EmailActions.setEmail(emails));
+      else dispatch(EmailActions.setSentBoxEmails(emails));
+    };
 
-  }, [getEmailData, dispatch]);
+    // const afterGetSentEmailData = (data) => {
+    //   let emails = [];
+
+    //     for (let i in data) {
+    //       emails.push({
+    //         id: i,
+    //         to: data[i].to,
+    //         from: data[i].from,
+    //         subject: data[i].subject,
+    //         message: data[i].message,
+    //         read: data[i].read,
+    //       });
+    //     }
+    //     dispatch(EmailActions.setSentBoxEmails(emails));
+    // }
+    if (match === "inbox")
+      getEmailData(
+        {
+          url: "https://mail-box-client-bcd20-default-rtdb.firebaseio.com/email.json",
+        },
+        afterGetEmailData
+      );
+    else
+      getEmailData(
+        {
+          url: "https://mail-box-client-bcd20-default-rtdb.firebaseio.com/sent.json",
+        },
+        afterGetEmailData
+      );
+  }, [getEmailData, dispatch, match]);
 
   return (
     <div className="container-fluid">
       <div className="row">
-        <SideBar />
+         <SideBar/>
         <div className="col-md-10 col-10">
           {filteredList.map((email) => {
             return (

@@ -3,7 +3,7 @@ import Box from "./Box";
 
 const SentBox = () => {
   const LoggedInemail = useSelector((state) => state.Auth.email);
-  const emailData = useSelector((state) => state.Email.emails);
+  const emailData = useSelector((state) => state.Email.sentBox);
 
   const filteredList = emailData.filter((email) => {
       return email.from === LoggedInemail;
